@@ -1,20 +1,37 @@
-points <- function(..., frets = 12, auto_open = TRUE, debug = FALSE) {
+points <- function(...,
+                   frets = 5,
+                   strings = 6,
+                   auto_open = TRUE,
+                   flip = c("none", "x", "y", "both"),
+                   rotate = FALSE,
+                   debug = FALSE) {
 
-  data <- list(...) %>%
-    purrr::map(dplyr::as_tibble) %>%
-    dplyr::bind_rows(.id = "id") %>%
-    dplyr::mutate(id = as.integer(id))
+  flip <- rlang::arg_match(flip)
+
+  flip <- list(
+    x = flip %in% c("x", "both"),
+    y = flip %in% c("y", "both")
+  )
+
+  if (rotate) {
+    flip$y <- `!`(flip$y)
+  }
+
+  dots <- list(...)
+  stopifnot("Arguments in `...` must not be named" = is.null(names(dots)))
+
+  data <- combine_points(...)
 
   if (auto_open) {
     open_strings <- dplyr::tibble(
-      str = setdiff(1:6, data$str),
+      str = setdiff(seq_len(strings), data$str),
       fr = -1,
       label = "",
       shape = "circle open",
       colour = "black",
       fill = "white",
       size = 3,
-      type = "single",
+      multi_string = FALSE,
       id = max(data$id) + 1
     )
     data <- dplyr::bind_rows(data, open_strings)
@@ -22,7 +39,7 @@ points <- function(..., frets = 12, auto_open = TRUE, debug = FALSE) {
 
   if (debug) print(data)
 
-  data <- data %>%
+  data <- data |>
     dplyr::left_join(
       dplyr::bind_rows(
         dplyr::tibble(
@@ -42,31 +59,64 @@ points <- function(..., frets = 12, auto_open = TRUE, debug = FALSE) {
     )
 
   invisible(list(
-    ggplot2::geom_point(
-      ggplot2::aes(str, fr_midpoint, shape = shape, size = size, colour = colour, fill = fill),
+
+    # Single-string markers
+    geom_point(
+      aes(
+        x = if (rotate) fr_midpoint else str,
+        y = if (rotate) str         else fr_midpoint,
+        shape = shape, size = size, colour = colour, fill = fill
+      ),
       data = data
     ),
-    ggplot2::geom_text(
-      ggplot2::aes(y = fr_midpoint, label = label),
-      data = data %>% dplyr::filter(type == "single"),
+
+    # Single-string labels
+    geom_text(
+      aes(
+        x = if (rotate) fr_midpoint else str,
+        y = if (rotate) str         else fr_midpoint,
+        label = label
+      ),
+      data = data |> dplyr::filter(!multi_string),
       colour = "white", family = "Roboto Mono"
     ),
-    ggplot2::geom_path(
-      ggplot2::aes(str, fr_midpoint, size = size * 0.9, colour = colour, group = id),
-      data = data %>% dplyr::filter(type == "barre"),
+
+    # Multi-string markers
+    geom_path(
+      aes(
+        x = if (rotate) fr_midpoint else str,
+        y = if (rotate) str         else fr_midpoint,
+        size = size * 0.9, colour = colour, group = id
+      ),
+      data = data |> dplyr::filter(multi_string),
       linejoin = "round", lineend = "round"
     ),
-    ggplot2::geom_text(
-      ggplot2::aes(y = fr_midpoint, label = label),
-      data = data %>%
-        dplyr::filter(type == "barre") %>%
-        dplyr::group_by(across(-str)) %>%
+
+    # Multi-string labels
+    geom_text(
+      aes(
+        x = if (rotate) fr_midpoint else str,
+        y = if (rotate) str         else fr_midpoint,
+        label = label
+      ),
+      data = data |>
+        dplyr::filter(multi_string) |>
+        dplyr::group_by(across(-str)) |>
         dplyr::summarise(str = mean(str), .groups = "drop"),
       colour = "white", family = "Roboto Mono"
     ),
-    ggplot2::scale_shape_identity(),
-    ggplot2::scale_colour_identity(),
-    ggplot2::scale_fill_identity()
+
+    # Scales
+    scale_shape_identity(),
+    scale_colour_identity(),
+    scale_fill_identity()
   ))
 
+}
+
+combine_points <- function(...) {
+  list(...) |>
+    purrr::map(dplyr::as_tibble) |>
+    dplyr::bind_rows(.id = "id") |>
+    dplyr::mutate(id = as.integer(id))
 }
