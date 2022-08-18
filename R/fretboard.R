@@ -109,10 +109,31 @@ fretboard <- function(title = NULL,
 }
 
 
+#' Add points to a fretboard
+#'
+#' Aliases `fngr()`, `thmb()` and `barr()` are provided because code looks nicer
+#' when things align.
+#'
+#' @param str The string(s) to put the point on
+#' @param fr The fret to put the point on. Use `-1` to place a point behind the
+#'   nut - this is common notation for muting.
+#' @param label The label for the point
+#' @param shape,colour,fill,size Used to change the appearance of the point -
+#'   passed to `ggplot2::geom_point()`
+#'
+#' @return A named list
+#' @export
+#' @rdname points
 fngr <- function(str, fr, label = "", shape = "circle", colour = "black", fill = "black", size = 5) {
   do.call(make_fretboard_marker, capture_environment())
 }
 
+#' @export
+#' @rdname points
+finger <- fngr
+
+#' @export
+#' @rdname points
 thmb <- function(str, fr, label = "T", shape = "diamond", colour = "black", fill = "black", size = 5) {
 
   if (!out$str %in% 1:2) {
@@ -123,11 +144,23 @@ thmb <- function(str, fr, label = "T", shape = "diamond", colour = "black", fill
 
 }
 
+#' @export
+#' @rdname points
+thumb <- thmb
+
+#' @export
+#' @rdname points
 barr <- function(str, fr, label = "", shape = "circle", colour = "black", fill = "black", size = 5) {
   multi_string <- TRUE
   do.call(make_fretboard_marker, capture_environment())
 }
 
+#' @export
+#' @rdname points
+barre <- barr
+
+#' @export
+#' @rdname points
 mute <- function(str, fr = -1, shape = "cross", colour = "black", fill = "black", size = 5) {
   do.call(make_fretboard_marker, capture_environment())
 }
@@ -144,9 +177,9 @@ make_fretboard_marker <- function(str, fr,
     is.logical(multi_string),
     length(multi_string) == 1,
     length(str) == 1 | multi_string,
+    length(shape) == 1,
     length(fr) == 1,
     length(label) == 1,
-    shape %in% ggplot2_shapes,
     fr >= -1
   )
 
@@ -168,13 +201,3 @@ make_fretboard_marker <- function(str, fr,
   capture_environment(except = "opts")
 
 }
-
-#### ggplot2_shapes ------------------------------------------------------------
-ggplot2_shapes <- c(
-  "circle", paste("circle", c("open", "filled", "cross", "plus", "small")), "bullet",
-  "square", paste("square", c("open", "filled", "cross", "plus", "triangle")),
-  "diamond", paste("diamond", c("open", "filled", "plus")),
-  "triangle", paste("triangle", c("open", "filled", "square")),
-  paste("triangle down", c("open", "filled")),
-  "plus", "cross", "asterisk"
-)
