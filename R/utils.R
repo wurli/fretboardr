@@ -5,3 +5,5 @@ capture_environment <- function(except = NULL) {
   out[!names(out) %in% except]
 
 }
+
+`%or%` <- function(x, y) if (length(x) == 0) y else x

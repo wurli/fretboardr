@@ -97,7 +97,7 @@ fretboard <- function(title = NULL,
     scale_y_continuous(trans = if (flip$y) "reverse" else "identity") +
     x_scale +
     theme_void() +
-    coord_fixed() +
+    coord_fixed(clip = "off") +
     labs(title = title) +
     theme(
       text = element_text("Roboto Mono"),
@@ -108,11 +108,13 @@ fretboard <- function(title = NULL,
 
 }
 
-
 #' Add points to a fretboard
 #'
-#' Aliases `fngr()`, `thmb()` and `barr()` are provided because code looks nicer
-#' when things align.
+#' Use `thmb()`, `indx()`, `mddl()`, `ring()` and `pnky()` to add points for the
+#' different digits. Use `mute()` and `barr()` for special markers.
+#'
+#' Aliases `thumb()`, `index()`, `middle()`, `pinky()` and `barre()` are 
+#' provided, but the four-character functions are nice for alignment.
 #'
 #' @param str The string(s) to put the point on
 #' @param fr The fret to put the point on. Use `-1` to place a point behind the
@@ -124,40 +126,66 @@ fretboard <- function(title = NULL,
 #' @return A named list
 #' @export
 #' @rdname points
-fngr <- function(str, fr, label = "", shape = "circle", colour = "black", fill = "black", size = 5) {
-  do.call(make_fretboard_marker, capture_environment())
-}
-
-#' @export
-#' @rdname points
-finger <- fngr
-
-#' @export
-#' @rdname points
-thmb <- function(str, fr, label = "T", shape = "diamond", colour = "black", fill = "black", size = 5) {
-
-  if (!out$str %in% 1:2) {
+thumb <- function(str, fr, label = "T", shape = "diamond", colour = "black", fill = "black", size = 5) {
+  
+  if (!str %in% 1:2) {
     cli::cli_warn("Only freaks can fret string #{out$str} with their thumbs")
   }
-
+  
   do.call(make_fretboard_marker, capture_environment())
-
+  
 }
 
 #' @export
 #' @rdname points
-thumb <- thmb
+thmb <- thumb
 
 #' @export
 #' @rdname points
-barr <- function(str, fr, label = "", shape = "circle", colour = "black", fill = "black", size = 5) {
+index <- function(str, fr, label = "I", shape = "circle", colour = "black", fill = "black", size = 5) {
+  do.call(make_fretboard_marker, capture_environment())
+}
+
+#' @export
+#' @rdname points
+indx <- index
+
+#' @export
+#' @rdname points
+middle <- function(str, fr, label = "M", shape = "circle", colour = "black", fill = "black", size = 5) {
+  do.call(make_fretboard_marker, capture_environment())
+}
+
+#' @export
+#' @rdname points
+mddl <- middle
+
+#' @export
+#' @rdname points
+ring <- function(str, fr, label = "R", shape = "circle", colour = "black", fill = "black", size = 5) {
+  do.call(make_fretboard_marker, capture_environment())
+}
+
+#' @export
+#' @rdname points
+pinky <- function(str, fr, label = "P", shape = "circle", colour = "black", fill = "black", size = 5) {
+  do.call(make_fretboard_marker, capture_environment())
+}
+
+#' @export
+#' @rdname points
+pnky <- pinky
+
+#' @export
+#' @rdname points
+barre <- function(str, fr, label = "", shape = "circle", colour = "black", fill = "black", size = 5) {
   multi_string <- TRUE
   do.call(make_fretboard_marker, capture_environment())
 }
 
 #' @export
 #' @rdname points
-barre <- barr
+barr <- barre
 
 #' @export
 #' @rdname points

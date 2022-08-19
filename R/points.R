@@ -5,7 +5,7 @@ points <- function(...,
                    flip = c("none", "x", "y", "both"),
                    rotate = FALSE,
                    debug = FALSE) {
-
+  
   flip <- rlang::arg_match(flip)
 
   flip <- list(
@@ -32,7 +32,7 @@ points <- function(...,
       fill = "white",
       size = 3,
       multi_string = FALSE,
-      id = max(data$id) + 1
+      id = max(data$id %or% 0) + 1
     )
     data <- dplyr::bind_rows(data, open_strings)
   }
@@ -115,8 +115,14 @@ points <- function(...,
 }
 
 combine_points <- function(...) {
-  list(...) |>
+  
+  empty <- ...length() == 0
+  dots  <- if (!empty) list(...) else list(thmb(1, 1))
+  
+  dots |>
     purrr::map(dplyr::as_tibble) |>
     dplyr::bind_rows(.id = "id") |>
-    dplyr::mutate(id = as.integer(id))
+    dplyr::mutate(id = as.integer(id)) |> 
+    dplyr::filter(!empty)
+  
 }

@@ -41,3 +41,14 @@ A ggplot
 \description{
 Make a fretboard diagram
 }
+\examples{
+diagram(
+  "F# (Henrix Style)",
+  thmb(1, 2),
+  fngr(2, 4, "R"),
+  fngr(3, 4, "P"),
+  fngr(4, 3, "M"),
+  barr(5:6, 2, "I"),
+  rotate = TRUE
+)
+}
