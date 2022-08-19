@@ -5,14 +5,10 @@ layer_points <- function(data,
                          flip = c("none", "x", "y", "both"),
                          rotate = FALSE,
                          debug = FALSE) {
-  
-  flip         <- get_flip(flip, rotate)
-  string_names <- get_string_names(strings)
-  n_strings    <- get_n_strings(strings)
 
   if (auto_open) {
     open_strings <- dplyr::tibble(
-      str = setdiff(seq_len(n_strings), data$str),
+      str = as.integer(strings[!strings %in% data$str]),
       fr = -1,
       label = "",
       shape = "circle open",
@@ -21,8 +17,13 @@ layer_points <- function(data,
       size = 3,
       multi_string = FALSE,
       id = max(data$id %or% 0) + 1
-    )
-    data <- dplyr::bind_rows(data, open_strings)
+    ) 
+    
+    data <- dplyr::bind_rows(
+      data |> dplyr::mutate(str = as.integer(str)), 
+      open_strings
+    ) |>
+      dplyr::mutate(str = as.integer(str))
   }
 
   if (debug) print(data)
@@ -66,7 +67,7 @@ layer_points <- function(data,
         label = label
       ),
       data = data |> dplyr::filter(!multi_string),
-      colour = "white", family = "Roboto Mono"
+      colour = "white", family = opt("base_font") %||% NA
     ),
 
     # Multi-string markers
@@ -91,7 +92,7 @@ layer_points <- function(data,
         dplyr::filter(multi_string) |>
         dplyr::group_by(across(-str)) |>
         dplyr::summarise(str = mean(str), .groups = "drop"),
-      colour = "white", family = "Roboto Mono"
+      colour = "white", family = opt("base_font") %||% NA
     ),
 
     # Scales

@@ -8,10 +8,11 @@ diagram(
   title = NULL,
   ...,
   frets = NULL,
-  strings = 6,
+  strings = c("E1", "A", "D", "G", "B", "E2"),
   flip = c("none", "x", "y", "both"),
   rotate = FALSE,
   auto_open = TRUE,
+  label_strings = FALSE,
   debug = FALSE
 )
 }
@@ -45,9 +46,9 @@ Make a fretboard diagram
 diagram(
   "F# (Henrix Style)",
   thmb(1, 2),
-  fngr(2, 4, "R"),
-  fngr(3, 4, "P"),
-  fngr(4, 3, "M"),
+  ring(2, 4),
+  pnky(3, 4),
+  mddl(4, 3),
   barr(5:6, 2, "I"),
   rotate = TRUE
 )

@@ -43,7 +43,7 @@ diagram <- function(title = NULL,
   } 
   
   strings  <- factor(strings, levels = strings)
-  flip     <- get_flip(flip, rotate)
+  flip     <- get_flip(flip[1], rotate)
   n_points <- ...length() 
   points   <- list(...) |> 
     validate_string_values(strings, label_strings, labs_provided) |> 

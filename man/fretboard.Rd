@@ -7,7 +7,8 @@
 fretboard(
   title = NULL,
   frets = 5,
-  strings = 6,
+  strings = factor(c("E1", "A", "D", "G", "B", "E2"), c("E1", "A", "D", "G", "B", "E2")),
+  label_strings = TRUE,
   flip = c("none", "x", "y", "both"),
   rotate = FALSE
 )

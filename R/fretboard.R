@@ -68,7 +68,7 @@ fretboard <- function(title = NULL,
       data = ~ . |>
         dplyr::mutate(str = -0.2, fr_pos = fr_midpoint) |>
         dplyr::filter(marker_1 | marker_2),
-      family = "Roboto Mono", hjust = 1
+      family = opt("base_font") %||% NA, hjust = 1
     ) +
     scale_y_continuous(trans = if (flip$y) "reverse" else "identity") +
     scale_x_continuous(
@@ -85,7 +85,7 @@ fretboard <- function(title = NULL,
     labs(title = title) +
     theme_void() + 
     theme(
-      text = element_text("Roboto Mono"),
+      text = element_text(opt("base_font")),
       plot.title = element_text(
         hjust = 0.5, size = 20,
         margin = margin(t = 3.5, b = 10)
