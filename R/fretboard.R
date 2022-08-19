@@ -9,42 +9,18 @@
 #' @return A ggplot
 fretboard <- function(title = NULL,
                       frets = 5,
-                      strings = 6,
+                      strings = factor(
+                        c("E1", "A", "D", "G", "B", "E2"),
+                        c("E1", "A", "D", "G", "B", "E2")
+                      ),
+                      label_strings = TRUE,
                       flip = c("none", "x", "y", "both"),
                       rotate = FALSE) {
-
-  flip <- rlang::arg_match(flip)
-
-  flip <- list(
-    x = flip %in% c("x", "both"),
-    y = flip %in% c("y", "both")
-  )
-
-  if (rotate) {
-    flip$y <- `!`(flip$y)
-  }
-
-  if (is.numeric(strings)) {
-    str         <- seq_len(strings)
-    axis_text_x <- element_blank()
-    x_scale     <- scale_x_continuous(
-      expand = expansion(add = 2),
-      trans = if (flip$x) "reverse" else "identity"
-    )
-  } else {
-    str         <- seq_along(strings)
-    axis_text_x <- element_text()
-    x_scale     <- scale_x_discrete(
-      limits = strings,
-      expand = expansion(add = 2),
-      trans = if (flip$x) "reverse" else "identity"
-    )
-  }
-
+  
   data <- dplyr::tibble(
-    str = str,
+    str = as.integer(strings),
     str_size = seq(1, 0.5, length.out = length(str))
-  ) |>
+  ) |> 
     dplyr::left_join(
       dplyr::tibble(
         fr = seq(0, frets, by = 1),
@@ -95,14 +71,19 @@ fretboard <- function(title = NULL,
       family = "Roboto Mono", hjust = 1
     ) +
     scale_y_continuous(trans = if (flip$y) "reverse" else "identity") +
-    x_scale +
+    scale_x_continuous(
+      labels = levels(strings),
+      breaks = as.integer(strings),
+      expand = expansion(add = 2),
+      trans = if (flip$x) "reverse" else "identity"
+    ) +
     theme_void() +
     coord_fixed(clip = "off") +
     labs(title = title) +
     theme(
       text = element_text("Roboto Mono"),
       plot.title = element_text(hjust = 0.56, size = 20),
-      axis.text.x = axis_text_x
+      axis.text.x = if (label_strings) element_text() else element_blank()
     ) +
     scale_size_identity()
 
@@ -129,7 +110,7 @@ fretboard <- function(title = NULL,
 thumb <- function(str, fr, label = "T", shape = "diamond", colour = "black", fill = "black", size = 5) {
   
   if (!str %in% 1:2) {
-    cli::cli_warn("Only freaks can fret string #{out$str} with their thumbs")
+    cli::cli_warn("Only freaks can fret string {str} with their thumbs")
   }
   
   do.call(make_fretboard_marker, capture_environment())
@@ -211,14 +192,6 @@ make_fretboard_marker <- function(str, fr,
     fr >= -1
   )
 
-  if (is.character(str)) {
-    opts <- getOption("fretboardr.string_names") %||% c(
-      "E1", "A", "D", "G", "B", "E2"
-    )
-    stopifnot(str %in% opts)
-    str <- which(opts == str)
-  }
-
   size <- switch(
     shape,
     diamond = size * 7 / 5,
@@ -228,4 +201,19 @@ make_fretboard_marker <- function(str, fr,
 
   capture_environment(except = "opts")
 
+}
+
+
+get_flip <- function(flip = c("none", "x", "y", "both"), rotate) {
+  flip <- rlang::arg_match(flip)
+  
+  flip <- list(
+    x = flip %in% c("x", "both"),
+    y = flip %in% c("y", "both")
+  )
+  
+  if (rotate) {
+    flip$y <- `!`(flip$y)
+  }
+  flip
 }

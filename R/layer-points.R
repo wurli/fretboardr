@@ -5,10 +5,14 @@ layer_points <- function(data,
                          flip = c("none", "x", "y", "both"),
                          rotate = FALSE,
                          debug = FALSE) {
+  
+  flip         <- get_flip(flip, rotate)
+  string_names <- get_string_names(strings)
+  n_strings    <- get_n_strings(strings)
 
   if (auto_open) {
     open_strings <- dplyr::tibble(
-      str = strings[!strings %in% data$str],
+      str = setdiff(seq_len(n_strings), data$str),
       fr = -1,
       label = "",
       shape = "circle open",
@@ -18,8 +22,7 @@ layer_points <- function(data,
       multi_string = FALSE,
       id = max(data$id %or% 0) + 1
     )
-    data <- dplyr::bind_rows(data, open_strings) |> 
-      dplyr::mutate(str = as.integer(str))
+    data <- dplyr::bind_rows(data, open_strings)
   }
 
   if (debug) print(data)
