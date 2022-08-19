@@ -38,7 +38,7 @@ fretboard <- function(title = NULL,
       marker_2 = fr %in% c(12),
       nut = fr == 0
     )
-
+  
   data |>
     ggplot(aes(if (rotate) fr_pos else str, if (rotate) str else fr_pos)) +
     geom_line(aes(group = fr), size = 0.8, colour = "grey50") +
@@ -77,12 +77,19 @@ fretboard <- function(title = NULL,
       expand = expansion(add = 2),
       trans = if (flip$x) "reverse" else "identity"
     ) +
-    theme_void() +
-    coord_fixed(clip = "off") +
+    coord_fixed(
+      clip = "off",
+      xlim = if (!rotate) c(1, NA),
+      ylim = if (rotate) c(1, NA)
+    ) +
     labs(title = title) +
+    theme_void() + 
     theme(
       text = element_text("Roboto Mono"),
-      plot.title = element_text(hjust = 0.56, size = 20),
+      plot.title = element_text(
+        hjust = 0.5, size = 20,
+        margin = margin(t = 3.5, b = 10)
+      ),
       axis.text.x = if (label_strings) element_text() else element_blank()
     ) +
     scale_size_identity()
